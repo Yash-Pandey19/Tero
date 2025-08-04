@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "huffman.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node node.js"
   },
   "keywords": [],
   "author": "",
@@ -13,7 +14,7 @@
     "adm-zip": "^0.5.16",
     "express": "^4.21.2",
     "file-type": "^16.5.4",
-    "fs": "^0.0.1-security",
+    "fs": "0.0.1-security",
     "jszip": "^3.10.1",
     "multer": "^2.0.2",
     "path": "^0.12.7",

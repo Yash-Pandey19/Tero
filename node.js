@@ -151,9 +151,67 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             return res.status(400).send(`Unsupported file type (${fileExtension}). Please upload a PDF, Word document, image, video, or text file.`);
         }
 
-        res.send(
-            `File compressed successfully! <a href="/download/${path.basename(compressedFilePath)}" download>Download Compressed File</a>`
-        );
+        // 📏 Compare sizes
+        const originalSize = fs.statSync(filePath).size;
+        const compressedSize = fs.statSync(compressedFilePath).size;
+        const compressionRatio = ((originalSize - compressedSize) / originalSize) * 100;
+
+        res.send(`
+            <!DOCTYPE html>
+            <html>
+                <head>
+                <title>Compression Report</title>
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <style>
+                    body {
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                    margin: 30px;
+                    }
+                    canvas {
+                    max-width: 400px;
+                    margin: auto;
+                    }
+                </style>
+                </head>
+                <body>
+                <h2>Compression Successful</h2>
+                <p><strong>Original Size:</strong> ${(originalSize / 1024).toFixed(2)} KB</p>
+                <p><strong>Compressed Size:</strong> ${(compressedSize / 1024).toFixed(2)} KB</p>
+                <p><strong>Compression Ratio:</strong> ${compressionRatio.toFixed(2)}%</p>
+
+                <canvas id="sizeChart"></canvas>
+
+                <script>
+                    const ctx = document.getElementById('sizeChart').getContext('2d');
+                    new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Original', 'Compressed'],
+                        datasets: [{
+                        label: 'File Size (KB)',
+                        data: [${(originalSize / 1024).toFixed(2)}, ${(compressedSize / 1024).toFixed(2)}],
+                        backgroundColor: ['#007bff', '#28a745']
+                        }]
+                    },
+                    options: {
+                        scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                        }
+                    }
+                    });
+                </script>
+
+                <br><br>
+                <a href="/download/${path.basename(compressedFilePath)}" download>
+                    📥 Download Compressed File
+                </a>
+                </body>
+            </html>
+        `);
+
     } catch (error) {
         console.error('Error compressing file:', error); // Debug
         return res.status(500).send(`Error compressing file: ${error.message}`);
